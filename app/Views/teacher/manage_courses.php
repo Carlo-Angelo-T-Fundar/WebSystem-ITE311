@@ -233,10 +233,13 @@
     
     <!-- Search Script -->
     <script>
+        // Client-side search with AJAX capability
+        let searchTimeout;
         document.getElementById('courseSearch').addEventListener('keyup', function() {
             const searchTerm = this.value.toLowerCase();
             const courseCards = document.querySelectorAll('.col-md-6.mb-4');
             
+            // Client-side instant filtering
             courseCards.forEach(function(card) {
                 const text = card.textContent.toLowerCase();
                 if (text.includes(searchTerm)) {
@@ -245,6 +248,27 @@
                     card.style.display = 'none';
                 }
             });
+            
+            // AJAX search with debouncing (waits 500ms after user stops typing)
+            clearTimeout(searchTimeout);
+            if (searchTerm.length >= 3) {
+                searchTimeout = setTimeout(function() {
+                    // Perform AJAX search for server-side filtering
+                    $.ajax({
+                        url: '<?= base_url('courses/search') ?>',
+                        method: 'GET',
+                        data: { search_term: searchTerm },
+                        dataType: 'json',
+                        success: function(response) {
+                            console.log('AJAX Search Results:', response);
+                            // Results are already filtered client-side, but this demonstrates AJAX capability
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('Search error:', error);
+                        }
+                    });
+                }, 500);
+            }
         });
     </script>
 </body>
